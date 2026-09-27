@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 interface NotificationItem {
   id: string;
@@ -31,7 +31,19 @@ export default function CustomerNotificationsPage() {
   };
 
   useEffect(() => {
-    fetchNotifs();
+    let ignore = false;
+    fetch("/api/portal/notifications")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!ignore && json) setNotifications(json.notifications);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleMarkAllRead = async () => {

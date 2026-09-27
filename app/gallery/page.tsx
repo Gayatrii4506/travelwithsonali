@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MapPin, Maximize2 } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";

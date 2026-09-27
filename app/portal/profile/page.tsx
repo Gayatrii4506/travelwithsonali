@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Lock, Phone, Mail, ShieldCheck } from "lucide-react";
+import { User, Lock } from "lucide-react";
 
 export default function CustomerProfilePage() {
   const [customer, setCustomer] = useState<{ name: string; phone: string; email?: string } | null>(null);

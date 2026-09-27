@@ -16,7 +16,7 @@ export async function GET() {
         role: admin.role,
       },
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ authenticated: false, admin: null });
   }
 }

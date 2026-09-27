@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/admin/auth";
 import { db } from "@/db";
-import { reviews, activityLogs } from "@/db/schema";
+import { reviews } from "@/db/schema";
 import { desc } from "drizzle-orm";
 
 export async function GET() {

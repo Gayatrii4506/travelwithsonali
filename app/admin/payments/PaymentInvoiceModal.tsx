@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Download,
   Mail,
@@ -8,7 +9,6 @@ import {
   X,
   FileText,
   Copy,
-  Printer,
 } from "lucide-react";
 
 export interface ExtendedPaymentRecord {
@@ -594,9 +594,11 @@ Mumbai / Delhi & Rishikesh, India`;
               <div>
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-full overflow-hidden border border-[#E8DCD5] shrink-0 bg-white">
-                    <img
+                    <Image
                       src="/travelwithsonalilogo.jpg"
                       alt="Travel With Sonali"
+                      width={44}
+                      height={44}
                       className="w-full h-full object-cover"
                     />
                   </div>

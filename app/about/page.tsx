@@ -2,8 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Heart, Compass, ShieldCheck, Users, Smile, Sparkles } from "lucide-react";
+import { Compass, ShieldCheck, Users } from "lucide-react";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";

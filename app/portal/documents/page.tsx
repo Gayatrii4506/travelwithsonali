@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FileCheck, Upload, ShieldCheck, AlertCircle, Plus } from "lucide-react";
+import { Upload, ShieldCheck, Plus } from "lucide-react";
 
 interface DocItem {
   id: string;
@@ -45,7 +45,22 @@ export default function CustomerDocumentsPage() {
   };
 
   useEffect(() => {
-    fetchDocs();
+    let ignore = false;
+    fetch("/api/portal/documents")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!ignore && json) {
+          setDocs(json.documents);
+          setSummary(json.summary);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleUploadSubmit = async (e: React.FormEvent) => {

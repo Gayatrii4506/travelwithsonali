@@ -73,7 +73,7 @@ export default function CustomerProfilePage({ params }: { params: Promise<{ id: 
     return <div className="p-8 text-center text-xs text-rose-600">Customer profile not found.</div>;
   }
 
-  const { customer, bookings, travellers, documents } = data;
+  const { customer, bookings, documents } = data;
 
   return (
     <div className="space-y-6">

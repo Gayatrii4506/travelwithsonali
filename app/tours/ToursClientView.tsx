@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Users, ChevronRight, Search } from "lucide-react";
+import { Clock, Users, ChevronRight } from "lucide-react";
 import { Tour } from "../data/toursData";
 import EnquireModal from "../components/EnquireModal";
 import { GooeyInput } from "@/components/ui/gooey-input";

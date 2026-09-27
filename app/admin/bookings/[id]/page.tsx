@@ -87,7 +87,19 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   };
 
   useEffect(() => {
-    fetchDetail();
+    let ignore = false;
+    fetch(`/api/admin/bookings/${id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!ignore && json) setData(json);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   const handleAddPayment = async (e: React.FormEvent) => {

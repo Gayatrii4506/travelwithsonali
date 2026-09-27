@@ -5,7 +5,6 @@ import {
   Star,
   Trash2,
   Search,
-  Filter,
   CheckCircle,
   AlertTriangle,
   ExternalLink,
@@ -40,10 +39,6 @@ export default function AdminReviewsPage() {
   const [confirmDeleteReview, setConfirmDeleteReview] = useState<AdminReview | null>(null);
   const [toastMessage, setToastMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  useEffect(() => {
-    fetchAdminReviews();
-  }, []);
-
   const fetchAdminReviews = async () => {
     try {
       setLoading(true);
@@ -65,6 +60,30 @@ export default function AdminReviewsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let ignore = false;
+    fetch("/api/admin/reviews")
+      .then(async (res) => {
+        if (res.ok) return res.json();
+        const fb = await fetch("/api/reviews");
+        if (fb.ok) {
+          const json = await fb.json();
+          return json.reviews || [];
+        }
+        return [];
+      })
+      .then((data) => {
+        if (!ignore && data) setReviewsList(data);
+      })
+      .catch((err) => console.error("Failed to fetch admin reviews:", err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const showToast = (type: "success" | "error", text: string) => {
     setToastMessage({ type, text });

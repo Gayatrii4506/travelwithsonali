@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search } from "lucide-react";
 import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface TravellerItem {

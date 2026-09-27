@@ -5,14 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpRight,
-  ArrowDown,
   Star,
-  Clock,
-  Users,
   ShieldCheck,
   Compass,
   HeartHandshake,
-  Sparkles,
   Smile,
   ChevronDown,
   ChevronRight,
@@ -25,6 +21,7 @@ import QRCodeBadge from "./components/QRCodeBadge";
 import StackedTourCards from "./components/StackedTourCards";
 import InstagramRoundCarousel from "./components/InstagramRoundCarousel";
 import AmbientCircles from "./components/AmbientCircles";
+import FannedCardsTestimonials from "./components/FannedCardsTestimonials";
 import { ParallaxHeroImages } from "@/components/ui/parallax-hero-images";
 import { SquigglyText } from "@/components/ui/squiggly-text";
 import {
@@ -49,7 +46,40 @@ import { Destination } from "./data/destinationsData";
 import { STORIES_DATA } from "./data/storiesData";
 import { TESTIMONIALS_DATA } from "./data/testimonialsData";
 import { FAQS_DATA } from "./data/faqsData";
-import { InstagramSectionData } from "@/lib/sanity/types";
+const TRIP_PILLARS = [
+  {
+    num: "01",
+    icon: Smile,
+    title: "Small Friendly Batches",
+    tag: "12–16 Travellers Max",
+    desc: "We cap our groups to 12–16 people so nobody gets left behind and everyone leaves as family.",
+    perk: "Lifelong friendships & zero crowds",
+  },
+  {
+    num: "02",
+    icon: ShieldCheck,
+    title: "Female-Friendly & Safe",
+    tag: "100% Solo Safe",
+    desc: "100% safe for solo female travellers, curated stays, verified transport and dedicated leaders.",
+    perk: "Verified stays & female tour captains",
+  },
+  {
+    num: "03",
+    icon: HeartHandshake,
+    title: "Curated Stays & Vibe",
+    tag: "Boutique & Riverside",
+    desc: "Handpicked boutique hotels, lakeside camps, riverside stays and local culinary experiences.",
+    perk: "Scenic boutique hotels & cozy vibes",
+  },
+  {
+    num: "04",
+    icon: Compass,
+    title: "Offbeat & Personal",
+    tag: "Secret Spots & Leisure",
+    desc: "Carefully planned itineraries balancing must-see sights with secret spots and leisure time.",
+    perk: "Hidden views & relaxed pacing",
+  },
+];
 
 interface HomeClientViewProps {
   tours: Tour[];
@@ -222,15 +252,15 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs sm:text-sm font-bold text-white">Roberto Carlos</span>
+                    <span className="text-xs sm:text-sm font-bold text-white">Sneha Kulkarni</span>
                     <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border border-white/30">
-                      <Image src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Roberto Carlos" fill className="object-cover" />
+                      <Image src="/images/sneha-kulkarni.jpg" alt="Sneha Kulkarni" fill className="object-cover object-top" />
                     </div>
                   </div>
                 </div>
 
                 <p className="text-xs sm:text-sm lg:text-base text-stone-200 italic leading-relaxed">
-                  &ldquo;Travel With Sonali made finding my perfect group trip effortless with detailed listings and personalized recommendations!&rdquo;
+                  &ldquo;Sonali made our trip planning so simple! The recommendations were really useful, and everything was arranged perfectly. We had a great time without any stress.&rdquo;
                 </p>
 
                 <div className="grid grid-cols-2 gap-4 pt-3 sm:pt-4 border-t border-white/15">
@@ -317,11 +347,12 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
 
       {/* ================= SECTION 3: MEET SONALI & WHY TRAVEL WITH US ================= */}
       <section className="relative w-full py-24 bg-[#FDF7F4] border-t border-[#E8DCD5] overflow-hidden">
-        {/* Parallax Hero Images floating with mouse move */}
-        <ParallaxHeroImages images={destinationImages} />
+        {/* Parallax Hero Images floating in foreground with mouse move */}
+        <ParallaxHeroImages images={destinationImages} className="z-20" />
         <AmbientCircles variant="2" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+        {/* Section Heading Container */}
+        <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16 space-y-3">
             <span className="text-xs uppercase tracking-widest text-[#8EB486] font-bold">
               Meet Sonali & The Personal Touch
             </span>
@@ -339,172 +370,55 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
               We aren&apos;t a large corporate agency. We are a personal travel company where every detail matters.
             </p>
           </div>
+        </div>
 
-          {/* Horizontally Moving Core Trip Pillars Marquee */}
-          <div className="relative w-full overflow-hidden py-4 group">
-            {/* Framed Viewport */}
-            <div className="rounded-[36px] sm:rounded-[44px] border border-[#E8DCD5]/80 bg-[#F7EFEA]/60 backdrop-blur-xs p-4 sm:p-6 overflow-hidden relative shadow-inner">
-              
-              {/* Frame Header Label */}
-              <div className="flex items-center justify-between px-2 pb-4 text-xs font-semibold text-[#997C70]">
-                <span className="uppercase tracking-widest text-[#8EB486] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Core Trip Pillars
-                </span>
-                <span className="text-[11px] text-[#997C70]/80">
-                  Hover to pause
-                </span>
-              </div>
+        {/* Full-width Carousel Animation of Cards */}
+        <div className="relative z-10 w-full overflow-hidden py-4 group">
+          {/* Edge Gradient Fades for ultra-smooth transition into background */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#FDF7F4] to-transparent pointer-events-none z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#FDF7F4] to-transparent pointer-events-none z-10" />
 
-              {/* Left Gradient Fade */}
-              <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-r from-[#F7EFEA] to-transparent pointer-events-none z-10" />
-
-                {/* Horizontally moving marquee track */}
-                <div className="animate-marquee-left flex gap-6 items-stretch">
-                  {[
-                    ...[
-                      {
-                        num: "01",
-                        icon: Smile,
-                        title: "Small Friendly Batches",
-                        tag: "12–16 Travellers Max",
-                        desc: "We cap our groups to 12–16 people so nobody gets left behind and everyone leaves as family.",
-                        perk: "Lifelong friendships & zero crowds",
-                      },
-                      {
-                        num: "02",
-                        icon: ShieldCheck,
-                        title: "Female-Friendly & Safe",
-                        tag: "100% Solo Safe",
-                        desc: "100% safe for solo female travellers, curated stays, verified transport and dedicated leaders.",
-                        perk: "Verified stays & female tour captains",
-                      },
-                      {
-                        num: "03",
-                        icon: HeartHandshake,
-                        title: "Curated Stays & Vibe",
-                        tag: "Boutique & Riverside",
-                        desc: "Handpicked boutique hotels, lakeside camps, riverside stays and local culinary experiences.",
-                        perk: "Scenic boutique hotels & cozy vibes",
-                      },
-                      {
-                        num: "04",
-                        icon: Compass,
-                        title: "Offbeat & Personal",
-                        tag: "Secret Spots & Leisure",
-                        desc: "Carefully planned itineraries balancing must-see sights with secret spots and leisure time.",
-                        perk: "Hidden views & relaxed pacing",
-                      },
-                    ],
-                    ...[
-                      {
-                        num: "01",
-                        icon: Smile,
-                        title: "Small Friendly Batches",
-                        tag: "12–16 Travellers Max",
-                        desc: "We cap our groups to 12–16 people so nobody gets left behind and everyone leaves as family.",
-                        perk: "Lifelong friendships & zero crowds",
-                      },
-                      {
-                        num: "02",
-                        icon: ShieldCheck,
-                        title: "Female-Friendly & Safe",
-                        tag: "100% Solo Safe",
-                        desc: "100% safe for solo female travellers, curated stays, verified transport and dedicated leaders.",
-                        perk: "Verified stays & female tour captains",
-                      },
-                      {
-                        num: "03",
-                        icon: HeartHandshake,
-                        title: "Curated Stays & Vibe",
-                        tag: "Boutique & Riverside",
-                        desc: "Handpicked boutique hotels, lakeside camps, riverside stays and local culinary experiences.",
-                        perk: "Scenic boutique hotels & cozy vibes",
-                      },
-                      {
-                        num: "04",
-                        icon: Compass,
-                        title: "Offbeat & Personal",
-                        tag: "Secret Spots & Leisure",
-                        desc: "Carefully planned itineraries balancing must-see sights with secret spots and leisure time.",
-                        perk: "Hidden views & relaxed pacing",
-                      },
-                    ],
-                    ...[
-                      {
-                        num: "01",
-                        icon: Smile,
-                        title: "Small Friendly Batches",
-                        tag: "12–16 Travellers Max",
-                        desc: "We cap our groups to 12–16 people so nobody gets left behind and everyone leaves as family.",
-                        perk: "Lifelong friendships & zero crowds",
-                      },
-                      {
-                        num: "02",
-                        icon: ShieldCheck,
-                        title: "Female-Friendly & Safe",
-                        tag: "100% Solo Safe",
-                        desc: "100% safe for solo female travellers, curated stays, verified transport and dedicated leaders.",
-                        perk: "Verified stays & female tour captains",
-                      },
-                      {
-                        num: "03",
-                        icon: HeartHandshake,
-                        title: "Curated Stays & Vibe",
-                        tag: "Boutique & Riverside",
-                        desc: "Handpicked boutique hotels, lakeside camps, riverside stays and local culinary experiences.",
-                        perk: "Scenic boutique hotels & cozy vibes",
-                      },
-                      {
-                        num: "04",
-                        icon: Compass,
-                        title: "Offbeat & Personal",
-                        tag: "Secret Spots & Leisure",
-                        desc: "Carefully planned itineraries balancing must-see sights with secret spots and leisure time.",
-                        perk: "Hidden views & relaxed pacing",
-                      },
-                    ],
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="w-[300px] sm:w-[340px] h-[250px] sm:h-[260px] p-6 rounded-[26px] bg-[#FDF7F4] border border-[#E8DCD5] flex flex-col justify-between shrink-0 shadow-sm hover:shadow-xl hover:border-[#8EB486] transition-all select-none cursor-pointer"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="w-11 h-11 rounded-2xl bg-[#8EB486]/15 text-[#8EB486] flex items-center justify-center shrink-0">
-                            <item.icon className="w-5 h-5" />
-                          </div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8EB486] bg-[#8EB486]/10 px-3 py-1 rounded-full border border-[#8EB486]/20">
-                            {item.tag}
-                          </span>
-                        </div>
-
-                        <div>
-                          <h4 className="text-lg font-bold text-[#685752] line-clamp-1">
-                            {item.title}
-                          </h4>
-                          <p className="text-xs text-[#7A6862] leading-relaxed mt-1 line-clamp-3">
-                            {item.desc}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="pt-3 border-t border-[#E8DCD5]/70 flex items-center justify-between text-[11px] text-[#997C70]">
-                        <span className="truncate">{item.perk}</span>
-                        <span className="font-mono text-[#8EB486] font-bold ml-2">{item.num}</span>
-                      </div>
+          {/* Horizontally moving marquee track */}
+          <div className="animate-marquee-left flex gap-6 items-stretch">
+            {[...TRIP_PILLARS, ...TRIP_PILLARS, ...TRIP_PILLARS, ...TRIP_PILLARS].map((item, idx) => (
+              <div
+                key={idx}
+                className="w-[300px] sm:w-[350px] h-[250px] sm:h-[260px] p-6 rounded-[26px] bg-white border border-[#E8DCD5] flex flex-col justify-between shrink-0 shadow-sm hover:shadow-xl hover:border-[#8EB486] transition-all select-none cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="w-11 h-11 rounded-2xl bg-[#8EB486]/15 text-[#8EB486] flex items-center justify-center shrink-0">
+                      <item.icon className="w-5 h-5" />
                     </div>
-                  ))}
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8EB486] bg-[#8EB486]/10 px-3 py-1 rounded-full border border-[#8EB486]/20">
+                      {item.tag}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-bold text-[#685752] line-clamp-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs text-[#7A6862] leading-relaxed mt-1 line-clamp-3">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Right Gradient Fade */}
-                <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-l from-[#F7EFEA] to-transparent pointer-events-none z-10" />
+                <div className="pt-3 border-t border-[#E8DCD5]/70 flex items-center justify-between text-[11px] text-[#997C70]">
+                  <span className="truncate">{item.perk}</span>
+                  <span className="font-mono text-[#8EB486] font-bold ml-2">{item.num}</span>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-      {/* ================= SECTION 4: DRAGGABLE DESTINATIONS SHOWCASE ================= */}
+      {/* ================= SECTION 4: TESTIMONIALS ================= */}
+      <FannedCardsTestimonials testimonials={TESTIMONIALS_DATA} />
+
+      {/* ================= SECTION 5: DRAGGABLE DESTINATIONS SHOWCASE ================= */}
       <section className="relative flex min-h-[90vh] lg:min-h-screen w-full items-center justify-center overflow-clip bg-[#F7EFEA] border-t border-[#E8DCD5]">
         <DraggableCardContainer className="relative flex min-h-[90vh] lg:min-h-screen w-full items-center justify-center overflow-clip py-16">
           {/* Centered Hero Heading & Call to Action */}
@@ -626,9 +540,11 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
               )}
             >
               <div className="relative h-56 sm:h-64 w-full overflow-hidden rounded-2xl bg-stone-200">
-                <img
+                <Image
                   src={item.image}
                   alt={item.title}
+                  fill
+                  sizes="(max-width: 640px) 288px, 320px"
                   className="pointer-events-none h-full w-full object-cover select-none"
                 />
                 <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20">
@@ -660,65 +576,6 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
             </DraggableCardBody>
           ))}
         </DraggableCardContainer>
-      </section>
-
-      {/* ================= SECTION 5: TESTIMONIALS ================= */}
-      <section className="relative w-full py-24 bg-[#FDF7F4] border-t border-[#E8DCD5] overflow-hidden">
-        <AmbientCircles variant="4" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <span className="text-xs uppercase tracking-widest text-[#8EB486] font-bold">
-              Traveller Experiences
-            </span>
-            <h2 className="text-4xl sm:text-5xl font-bold text-[#685752]">
-              Loved By{" "}
-              <SquigglyText
-                stepDuration={70}
-                scale={[4, 7]}
-                className="text-[#8EB486] font-serif-italic"
-              >
-                Fellow Souls
-              </SquigglyText>
-            </h2>
-            <p className="text-base text-[#7A6862]">
-              Here&apos;s what our travelers say about their group trips with Sonali.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {TESTIMONIALS_DATA.slice(0, 3).map((item) => (
-              <div key={item.id} className="p-8 rounded-3xl bg-[#F7EFEA] border border-[#E8DCD5] space-y-6 flex flex-col justify-between shadow-sm">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(item.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#8EB486] text-[#8EB486]" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-[#7A6862] italic leading-relaxed">
-                    &ldquo;{item.quote}&rdquo;
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 pt-4 border-t border-[#E8DCD5]">
-                  <div className="relative w-11 h-11 rounded-full overflow-hidden border border-[#E8DCD5]">
-                    <Image src={item.avatar} alt={item.name} fill className="object-cover" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#685752]">{item.name}</p>
-                    <p className="text-xs text-[#997C70]">{item.trip}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/testimonials" className="inline-flex items-center gap-2 text-sm font-semibold text-[#8EB486] hover:underline">
-              <span>Read All Traveller Reviews</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </div>
       </section>
 
       {/* ================= SECTION 6: HOW IT WORKS ================= */}
@@ -930,13 +787,5 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
         defaultTourName={selectedTourName}
       />
     </div>
-  );
-}
-
-function InstagramIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-    </svg>
   );
 }

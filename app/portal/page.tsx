@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  MapPin,
   Calendar,
   Users,
   CreditCard,
@@ -14,7 +13,6 @@ import {
   ChevronRight,
   Phone,
   MessageCircle,
-  Clock,
   Sparkles,
 } from "lucide-react";
 
@@ -118,7 +116,7 @@ export default function CustomerDashboardPage() {
 
   if (!data) return null;
 
-  const { customer, nextTrip, featuredTours, notifications } = data;
+  const { customer, nextTrip, featuredTours } = data;
 
   return (
     <div className="space-y-8">

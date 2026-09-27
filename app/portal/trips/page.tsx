@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Users, MapPin, ChevronRight } from "lucide-react";
+import { Calendar, Users, ChevronRight } from "lucide-react";
 
 interface CustomerTrip {
   id: string;

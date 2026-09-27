@@ -1,5 +1,5 @@
 import { sanityFetch } from "./client";
-import { SanityTour, SanityDestination, SanityStory, SanityInstagramSection, InstagramSectionData, InstagramMoment } from "./types";
+import { SanityDestination, SanityStory, SanityInstagramSection, InstagramSectionData, InstagramMoment } from "./types";
 import { TOURS_DATA, Tour } from "@/app/data/toursData";
 import { DESTINATIONS_DATA, Destination } from "@/app/data/destinationsData";
 import { STORIES_DATA, Story } from "@/app/data/storiesData";
@@ -203,7 +203,6 @@ export function mapSanityTourToAppTour(raw: Record<string, unknown>): Tour {
   const slugStr = typeof raw.slug === "string" ? raw.slug : String(raw._id || "tour");
 
   const heroImg = resolveImageUrl(raw.heroImage, DEFAULT_IMAGE);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const galleryImgs = Array.isArray(raw.gallery) && raw.gallery.length > 0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ? raw.gallery.map((g: any) => resolveImageUrl(g, DEFAULT_IMAGE))

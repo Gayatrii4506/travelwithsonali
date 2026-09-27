@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, Compass, ArrowLeft, KeyRound, CheckCircle2, ChevronRight } from "lucide-react";
+import { Mail, Compass, ArrowLeft, CheckCircle2, ChevronRight } from "lucide-react";
 import AuthBackgroundWrapper from "../components/AuthBackgroundWrapper";
 
 export default function ForgotPasswordPage() {

@@ -2,7 +2,7 @@ import React, { use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ChevronRight, Clock, MapPin, Compass, ArrowUpRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Compass } from "lucide-react";
 
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";

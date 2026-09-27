@@ -33,7 +33,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
     if (savedPaused === "true") {
       manualPauseRef.current = true;
-      setIsPlaying(false);
     } else {
       // Attempt autoplay
       const playPromise = audio.play();

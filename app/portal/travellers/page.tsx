@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Users, ShieldCheck, FileCheck } from "lucide-react";
 
 interface TravellerItem {
   id: string;

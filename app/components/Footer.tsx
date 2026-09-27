@@ -11,8 +11,6 @@ import {
   Mail,
   Send,
   ChevronRight,
-  Sparkles,
-  ArrowUpRight,
 } from "lucide-react";
 import { SquigglyText } from "@/components/ui/squiggly-text";
 
@@ -126,11 +124,6 @@ export default function Footer({ onEnquireClick }: FooterProps) {
                 <li>
                   <Link href="/stories" className="hover:text-[#8EB486] transition-colors">
                     Travel Stories & Blogs
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/testimonials" className="hover:text-[#8EB486] transition-colors">
-                    Traveller Reviews
                   </Link>
                 </li>
               </ul>

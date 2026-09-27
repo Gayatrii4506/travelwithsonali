@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { UserCheck, Search, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface CustomerItem {
@@ -20,22 +20,20 @@ export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const fetchCustomers = async () => {
-    try {
-      const res = await fetch("/api/admin/customers");
-      if (res.ok) {
-        const data = await res.json();
-        setCustomerList(data);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchCustomers();
+    let ignore = false;
+    fetch("/api/admin/customers")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!ignore && data) setCustomerList(data);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const filteredCustomers = customerList.filter(

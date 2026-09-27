@@ -3,7 +3,7 @@ import { getCurrentCustomer } from "@/lib/portal/auth";
 import { db } from "@/db";
 import { bookings } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { getActiveTours, resolveImageUrl } from "@/lib/sanity/queries";
+import { getActiveTours } from "@/lib/sanity/queries";
 
 export const dynamic = "force-dynamic";
 

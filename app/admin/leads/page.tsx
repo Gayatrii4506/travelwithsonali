@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, ArrowUpRight } from "lucide-react";
+import { Plus, ArrowUpRight } from "lucide-react";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import { TOURS_DATA } from "@/app/data/toursData";
 
@@ -54,7 +54,19 @@ export default function LeadsPage() {
   };
 
   useEffect(() => {
-    fetchLeads();
+    let ignore = false;
+    fetch("/api/admin/leads")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!ignore && data) setLeadsList(data);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleCreateLead = async (e: React.FormEvent) => {

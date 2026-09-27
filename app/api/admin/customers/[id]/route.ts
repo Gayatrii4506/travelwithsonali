@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/admin/auth";
 import { db } from "@/db";
-import { customers, bookings, travellers, payments, documents } from "@/db/schema";
+import { customers, bookings, travellers, documents } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {

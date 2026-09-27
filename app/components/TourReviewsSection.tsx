@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Star, CheckCircle, MessageSquare, ThumbsUp, X, Plus, AlertTriangle } from "lucide-react";
+import { Star, CheckCircle, MessageSquare, X, Plus, AlertTriangle } from "lucide-react";
 
 export interface TourReview {
   id: string;
@@ -57,29 +57,29 @@ export default function TourReviewsSection({ tourSlug, tourTitle }: TourReviewsS
     1: "Disappointing (1/5)",
   };
 
-  useEffect(() => {
-    fetchReviews();
-  }, [tourSlug]);
 
-  const fetchReviews = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/reviews?tourSlug=${encodeURIComponent(tourSlug)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReviewsList(data.reviews || []);
-        setStats({
-          averageRating: data.averageRating || 5.0,
-          totalReviews: data.totalReviews || 0,
-          ratingDistribution: data.ratingDistribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-        });
-      }
-    } catch (err) {
-      console.error("Failed to load reviews:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    let ignore = false;
+    fetch(`/api/reviews?tourSlug=${encodeURIComponent(tourSlug)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!ignore && data) {
+          setReviewsList(data.reviews || []);
+          setStats({
+            averageRating: data.averageRating || 5.0,
+            totalReviews: data.totalReviews || 0,
+            ratingDistribution: data.ratingDistribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+          });
+        }
+      })
+      .catch((err) => console.error("Failed to load reviews:", err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [tourSlug]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,8 +141,8 @@ export default function TourReviewsSection({ tourSlug, tourTitle }: TourReviewsS
           tripDate: "",
         });
       }, 2500);
-    } catch (err: any) {
-      setErrorMessage(err.message || "Failed to submit review. Please try again.");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Failed to submit review. Please try again.");
     } finally {
       setSubmitting(false);
     }

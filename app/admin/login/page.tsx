@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, ShieldCheck, Eye, EyeOff, Sparkles } from "lucide-react";
@@ -35,10 +34,9 @@ export default function AdminLoginPage() {
       }
 
       router.push("/admin");
-      router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login fetch error:", err);
-      setError(err?.message || "Unable to connect to login server. Please try again.");
+      setError(err instanceof Error ? err.message : "Unable to connect to login server. Please try again.");
       setLoading(false);
     }
   };

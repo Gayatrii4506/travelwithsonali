@@ -120,7 +120,7 @@ export async function GET(request: Request) {
   const tourSlug = searchParams.get("tourSlug");
 
   try {
-    let dbReviews: any[] = [];
+    let dbReviews: (typeof reviews.$inferSelect)[] = [];
     if (tourSlug) {
       dbReviews = await db
         .select()

@@ -77,10 +77,12 @@ export default function Navbar({ logoName = "Travel With Sonali" }: NavbarProps)
   }, [mobileMenuOpen]);
 
   // Reset visibility and close mobile menu on route change
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setIsVisible(true);
     setMobileMenuOpen(false);
-  }, [pathname]);
+  }
 
   // Hide on scroll down, show on scroll up
   useEffect(() => {

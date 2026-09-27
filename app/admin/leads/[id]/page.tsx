@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ChevronLeft, Phone, Mail, Clock, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, Phone, Mail, Clock } from "lucide-react";
 
 interface LeadDetailData {
   lead: {
@@ -51,7 +51,22 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   useEffect(() => {
-    fetchDetail();
+    let ignore = false;
+    fetch(`/api/admin/leads/${id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!ignore && json) {
+          setData(json);
+          setStatus(json.lead.status);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   const handleUpdate = async (e: React.FormEvent) => {

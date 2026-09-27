@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CreditCard, CheckCircle2, Clock } from "lucide-react";
 
 interface PaymentSummary {
   total: number;

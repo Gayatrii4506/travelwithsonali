@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, Search } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface DocumentItem {
@@ -36,7 +36,19 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
-    fetchDocs();
+    let ignore = false;
+    fetch("/api/admin/documents")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!ignore && data) setDocList(data);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleUpdateStatus = async (documentId: string, status: "Verified" | "Rejected") => {

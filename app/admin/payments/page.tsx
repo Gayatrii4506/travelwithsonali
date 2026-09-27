@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, FileText, Download, Share2, Printer, CheckCircle } from "lucide-react";
+import { FileText } from "lucide-react";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import PaymentInvoiceModal, { ExtendedPaymentRecord } from "./PaymentInvoiceModal";
 

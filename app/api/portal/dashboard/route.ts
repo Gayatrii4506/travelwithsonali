@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCurrentCustomer } from "@/lib/portal/auth";
 import { db } from "@/db";
-import { bookings, travellers, documents, notifications, payments } from "@/db/schema";
-import { eq, inArray, desc } from "drizzle-orm";
-import { getActiveTours, getTourBySlug, resolveImageUrl } from "@/lib/sanity/queries";
+import { bookings, travellers, documents, notifications } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { getActiveTours } from "@/lib/sanity/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +55,7 @@ export async function GET() {
         .where(eq(documents.bookingId, nextBooking.id));
 
       // Calculate readiness score
-      let totalSteps = 4;
+      const totalSteps = 4;
       let completedSteps = 0;
 
       if (nextBooking.bookingStatus === "Confirmed") completedSteps++;

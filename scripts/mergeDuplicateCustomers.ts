@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 import { db } from "../db";
-import { customers, bookings, travellers, payments } from "../db/schema";
+import { customers, bookings, travellers } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { normalizePhoneNumber } from "../lib/portal/auth";
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { HelpCircle, Phone, MessageCircle, Mail, ChevronRight } from "lucide-react";
+import { Phone, MessageCircle, Mail, ChevronRight } from "lucide-react";
 
 export default function CustomerHelpPage() {
   const faqs = [

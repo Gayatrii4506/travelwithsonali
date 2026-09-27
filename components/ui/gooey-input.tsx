@@ -145,11 +145,13 @@ export function GooeyInput({
     [onOpenChange],
   );
 
-  useEffect(() => {
+  const [prevValueProp, setPrevValueProp] = useState(valueProp);
+  if (valueProp !== prevValueProp) {
+    setPrevValueProp(valueProp);
     if (valueProp && !isExpanded) {
       setIsExpanded(true);
     }
-  }, [valueProp, isExpanded]);
+  }
 
   useEffect(() => {
     if (isExpanded) {

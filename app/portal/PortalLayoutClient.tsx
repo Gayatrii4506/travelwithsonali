@@ -15,8 +15,6 @@ import {
   HelpCircle,
   LogOut,
   MessageCircle,
-  Menu,
-  X,
   ChevronDown,
 } from "lucide-react";
 import { CustomerSession } from "@/lib/portal/auth";
@@ -30,7 +28,6 @@ export default function PortalLayoutClient({ customer, children }: PortalLayoutC
   const pathname = usePathname();
   const router = useRouter();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(1);
 

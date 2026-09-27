@@ -79,7 +79,6 @@ export async function loginCustomer(
     // Default password check if no passwordHash set yet: allow demo login with 'Customer123!' or customer phone
     if (!customer.passwordHash) {
       const defaultPass = "Customer123!";
-      const digits = normalizePhoneNumber(loginIdentifier);
       const custPhoneDigits = normalizePhoneNumber(customer.phone);
       if (password !== defaultPass && password !== customer.phone && password !== custPhoneDigits) {
         return { success: false, error: "Invalid password. Default access password is Customer123!" };
