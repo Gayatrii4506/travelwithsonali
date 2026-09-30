@@ -135,7 +135,7 @@ export default function StackedTourCards({
             <div className="grid grid-cols-1 lg:grid-cols-12 min-h-0 lg:min-h-[580px] items-stretch">
               
               {/* Left Column: Full-Bleed Hero Image with Badges */}
-              <div className="lg:col-span-7 relative h-44 sm:h-64 lg:h-full min-h-[175px] sm:min-h-[250px] lg:min-h-[580px] overflow-hidden group">
+              <div className="lg:col-span-7 relative h-72 xs:h-80 sm:h-64 lg:h-full min-h-[280px] xs:min-h-[320px] sm:min-h-[250px] lg:min-h-[580px] overflow-hidden group">
                 <Image
                   src={tour.image}
                   alt={tour.title}

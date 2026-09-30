@@ -143,3 +143,14 @@ export interface InstagramSectionData {
   buttonText?: string;
   moments?: InstagramMoment[];
 }
+
+export interface SanityGalleryItem {
+  _id: string;
+  _type: "galleryItem";
+  title: string;
+  location: string;
+  category: "Mountains" | "Spiritual" | "Beaches" | "Group Trips" | "Road Trips" | "People";
+  image?: SanityImage | string;
+  aspectRatio?: "square" | "tall" | "wide";
+  order?: number;
+}

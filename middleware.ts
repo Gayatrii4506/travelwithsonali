@@ -32,9 +32,6 @@ export function middleware(request: NextRequest) {
       pathname === "/portal/forgot-password" ||
       pathname === "/portal/reset-password"
     ) {
-      if (customerToken) {
-        return NextResponse.redirect(new URL("/portal", request.url));
-      }
       return NextResponse.next();
     }
 

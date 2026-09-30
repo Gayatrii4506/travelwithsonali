@@ -79,6 +79,12 @@ export default function CustomerLoginPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          {searchParams.get("expired") === "1" && (
+            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-medium text-amber-800">
+              Your previous session expired. Please sign in again.
+            </div>
+          )}
+
           {error && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700">
               {error}
@@ -145,6 +151,29 @@ export default function CustomerLoginPage() {
             )}
           </button>
         </form>
+
+        {/* Demo Customer Access Helper */}
+        <div className="p-3.5 rounded-2xl bg-[#8EB486]/10 border border-[#8EB486]/25 flex items-center justify-between text-xs">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#8EB486] block">
+              Demo Portal Customer
+            </span>
+            <p className="text-[11px] text-[#685752] font-medium">
+              rahul.verma@example.com
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setLoginIdentifier("rahul.verma@example.com");
+              setPassword("Customer123!");
+              setError("");
+            }}
+            className="px-3 py-1.5 rounded-full bg-[#8EB486] hover:bg-[#7A9F73] text-white text-[11px] font-semibold transition-colors shadow-xs cursor-pointer"
+          >
+            Autofill
+          </button>
+        </div>
 
         <div className="space-y-2 text-center pt-2 border-t border-[#E8DCD5] text-[11px] text-[#997C70]">
           <div className="flex items-center justify-center gap-1">

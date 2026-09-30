@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   Users,
@@ -67,6 +68,7 @@ interface DashboardData {
 }
 
 export default function CustomerDashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -77,6 +79,11 @@ export default function CustomerDashboardPage() {
     async function fetchDashboard() {
       try {
         const res = await fetch("/api/portal/dashboard");
+        if (res.status === 401) {
+          // Stale or missing session - cleanly route to login
+          router.replace("/portal/login");
+          return;
+        }
         if (res.ok) {
           const json = await res.json();
           setData(json);
@@ -88,7 +95,7 @@ export default function CustomerDashboardPage() {
       }
     }
     fetchDashboard();
-  }, []);
+  }, [router]);
 
   // Timer simulation
   useEffect(() => {

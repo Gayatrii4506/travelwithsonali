@@ -16,7 +16,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error || "Authentication failed." }, { status: 401 });
     }
 
-    return NextResponse.json({ success: true, message: "Welcome back!" });
+    const response = NextResponse.json({ success: true, message: "Welcome back!" });
+
+    if (result.token && result.expiresAt) {
+      response.cookies.set("customer_session", result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        expires: result.expiresAt,
+        path: "/",
+      });
+    }
+
+    return response;
   } catch (err) {
     console.error("Portal Auth Login Route Error:", err);
     return NextResponse.json({ error: "Server error during login." }, { status: 500 });

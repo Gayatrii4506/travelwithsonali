@@ -3,6 +3,7 @@ import path from "path";
 import { DESTINATIONS_DATA } from "../app/data/destinationsData";
 import { TOURS_DATA } from "../app/data/toursData";
 import { STORIES_DATA } from "../app/data/storiesData";
+import { GALLERY_DATA } from "../app/data/galleryData";
 
 const destinationDocs = DESTINATIONS_DATA.map((d) => ({
   _id: `dest-${d.id}`,
@@ -98,7 +99,17 @@ const storyDocs = STORIES_DATA.map((s) => ({
   content: s.content,
 }));
 
-const allDocs = [...destinationDocs, ...tourDocs, ...storyDocs];
+const galleryDocs = GALLERY_DATA.map((g, idx) => ({
+  _id: `gallery-${g.id}`,
+  _type: "galleryItem",
+  title: g.title,
+  location: g.location,
+  category: g.category,
+  aspectRatio: g.aspectRatio || "square",
+  order: idx + 1,
+}));
+
+const allDocs = [...destinationDocs, ...tourDocs, ...storyDocs, ...galleryDocs];
 const ndjsonContent = allDocs.map((doc) => JSON.stringify(doc)).join("\n");
 
 const outputPath = path.join(process.cwd(), "sanity-seed.ndjson");

@@ -11,7 +11,9 @@ export async function GET() {
   try {
     const customer = await getCurrentCustomer();
     if (!customer) {
-      return NextResponse.json({ error: "Unauthorized access." }, { status: 401 });
+      const response = NextResponse.json({ error: "Unauthorized access." }, { status: 401 });
+      response.cookies.delete("customer_session");
+      return response;
     }
 
     // 1. Fetch customer's bookings

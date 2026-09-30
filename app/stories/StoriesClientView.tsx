@@ -95,14 +95,14 @@ export default function StoriesClientView({ initialStories }: StoriesClientViewP
         </div>
 
         {/* Stories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
           {filteredStories.map((story) => (
             <div
               key={story.id}
-              className="group bg-[#F7EFEA] rounded-3xl overflow-hidden border border-[#E8DCD5] p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+              className="group flex flex-col justify-between"
             >
-              <div className="space-y-4">
-                <div className="relative h-64 rounded-2xl overflow-hidden">
+              <div>
+                <Link href={`/stories/${story.slug}`} className="block relative h-72 sm:h-80 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                   <Image
                     src={story.image}
                     alt={story.title}
@@ -112,18 +112,26 @@ export default function StoriesClientView({ initialStories }: StoriesClientViewP
                   <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-xs">
                     {story.category}
                   </span>
+                </Link>
+
+                <div className="mt-5 space-y-2.5">
+                  <div className="text-xs font-medium text-[#997C70]">
+                    {story.date} • {story.readTime}
+                  </div>
+
+                  <Link href={`/stories/${story.slug}`} className="block">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-[#685752] group-hover:text-[#8EB486] transition-colors leading-snug">
+                      {story.title}
+                    </h3>
+                  </Link>
+
+                  <p className="text-sm text-[#7A6862] leading-relaxed line-clamp-3">
+                    {story.excerpt}
+                  </p>
                 </div>
-
-                <h3 className="text-2xl font-bold text-[#685752] group-hover:text-[#8EB486] transition-colors">
-                  {story.title}
-                </h3>
-
-                <p className="text-sm text-[#7A6862] leading-relaxed line-clamp-3">
-                  {story.excerpt}
-                </p>
               </div>
 
-              <div className="pt-6 border-t border-[#E8DCD5] flex items-center justify-between mt-6">
+              <div className="pt-4 flex items-center justify-between mt-3">
                 <div className="flex items-center gap-2">
                   <div className="relative w-7 h-7 rounded-full overflow-hidden border border-[#E8DCD5]">
                     <Image src={story.authorAvatar} alt={story.author} fill className="object-cover" />
@@ -133,10 +141,10 @@ export default function StoriesClientView({ initialStories }: StoriesClientViewP
 
                 <Link
                   href={`/stories/${story.slug}`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#8EB486] hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8EB486] hover:underline group/btn"
                 >
                   <span>Read Story</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
 

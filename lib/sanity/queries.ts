@@ -1,8 +1,9 @@
 import { sanityFetch } from "./client";
-import { SanityDestination, SanityStory, SanityInstagramSection, InstagramSectionData, InstagramMoment } from "./types";
+import { SanityDestination, SanityStory, SanityInstagramSection, InstagramSectionData, InstagramMoment, SanityGalleryItem } from "./types";
 import { TOURS_DATA, Tour } from "@/app/data/toursData";
 import { DESTINATIONS_DATA, Destination } from "@/app/data/destinationsData";
 import { STORIES_DATA, Story } from "@/app/data/storiesData";
+import { GALLERY_DATA, GalleryItem } from "@/app/data/galleryData";
 import { urlFor } from "./image";
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=1200&q=80";
@@ -301,39 +302,57 @@ export async function getTourBySlug(slug: string): Promise<Tour | null> {
 export async function getDestinations(): Promise<Destination[]> {
   const sanityDestinations = await sanityFetch<SanityDestination[]>(destinationsQuery);
   if (sanityDestinations && sanityDestinations.length > 0) {
-    return sanityDestinations.map((d) => ({
-      id: d._id || d.slug.current,
-      slug: d.slug.current,
-      name: d.name,
-      tagline: d.shortDescription || "Unforgettable travel experience",
-      description: d.description || d.shortDescription || "",
-      image: resolveImageUrl(d.heroImage, DEFAULT_IMAGE),
-      featured: Boolean(d.featured),
-      toursCount: 1,
-      bestTimeToVisit: "Round the Year",
-      highlights: ["Scenic Views", "Group Travel", "Curated Stays"],
-    }));
+    return sanityDestinations.map((d) => {
+      // destinationsQuery projects "slug": slug.current, so d.slug can be a string or object
+      const rawSlug = d.slug as unknown;
+      const slugStr =
+        typeof rawSlug === "string"
+          ? rawSlug
+          : (rawSlug as { current?: string })?.current || d._id;
+
+      const fallback = DESTINATIONS_DATA.find((item) => item.slug === slugStr);
+      return {
+        ...(fallback || {}),
+        id: d._id || slugStr,
+        slug: slugStr,
+        name: d.name,
+        tagline: d.shortDescription || fallback?.tagline || "Unforgettable travel experience",
+        description: d.description || d.shortDescription || fallback?.description || "",
+        image: resolveImageUrl(d.heroImage, fallback?.image || DEFAULT_IMAGE),
+        featured: Boolean(d.featured),
+        toursCount: fallback?.toursCount || 1,
+        bestTimeToVisit: fallback?.bestTimeToVisit || "Round the Year",
+        highlights: fallback?.highlights || ["Scenic Views", "Group Travel", "Curated Stays"],
+      };
+    });
   }
   return DESTINATIONS_DATA;
 }
 
 export async function getDestinationBySlug(slug: string): Promise<Destination | null> {
+  const fallback = DESTINATIONS_DATA.find((d) => d.slug === slug);
   const sanityDest = await sanityFetch<SanityDestination>(destinationBySlugQuery, { slug });
   if (sanityDest && sanityDest.name) {
+    const rawSlug = sanityDest.slug as unknown;
+    const slugStr =
+      typeof rawSlug === "string"
+        ? rawSlug
+        : (rawSlug as { current?: string })?.current || slug;
+
     return {
-      id: sanityDest._id || sanityDest.slug.current,
-      slug: sanityDest.slug.current,
+      ...(fallback || {}),
+      id: sanityDest._id || slugStr,
+      slug: slugStr,
       name: sanityDest.name,
-      tagline: sanityDest.shortDescription || "Unforgettable travel experience",
-      description: sanityDest.description || sanityDest.shortDescription || "",
-      image: resolveImageUrl(sanityDest.heroImage, DEFAULT_IMAGE),
+      tagline: sanityDest.shortDescription || fallback?.tagline || "Unforgettable travel experience",
+      description: sanityDest.description || sanityDest.shortDescription || fallback?.description || "",
+      image: resolveImageUrl(sanityDest.heroImage, fallback?.image || DEFAULT_IMAGE),
       featured: Boolean(sanityDest.featured),
-      toursCount: 1,
-      bestTimeToVisit: "Round the Year",
-      highlights: ["Scenic Views", "Group Travel", "Curated Stays"],
+      toursCount: fallback?.toursCount || 1,
+      bestTimeToVisit: fallback?.bestTimeToVisit || "Round the Year",
+      highlights: fallback?.highlights || ["Scenic Views", "Group Travel", "Curated Stays"],
     };
   }
-  const fallback = DESTINATIONS_DATA.find((d) => d.slug === slug);
   return fallback || null;
 }
 
@@ -504,4 +523,31 @@ export async function getInstagramSection(): Promise<InstagramSectionData> {
     buttonText: "Follow @travel_withsonali",
     moments: DEFAULT_INSTAGRAM_MOMENTS,
   };
+}
+
+export const galleryItemsQuery = `
+  *[_type == "galleryItem"] | order(order asc, _createdAt desc) {
+    _id,
+    title,
+    location,
+    category,
+    image,
+    aspectRatio,
+    order
+  }
+`;
+
+export async function getGalleryItems(): Promise<GalleryItem[]> {
+  const sanityItems = await sanityFetch<SanityGalleryItem[]>(galleryItemsQuery);
+  if (sanityItems && sanityItems.length > 0) {
+    return sanityItems.map((item) => ({
+      id: item._id,
+      title: item.title || "Gallery Moment",
+      location: item.location || "India",
+      category: (item.category as GalleryItem["category"]) || "Mountains",
+      image: resolveImageUrl(item.image, DEFAULT_IMAGE),
+      aspectRatio: item.aspectRatio || "square",
+    }));
+  }
+  return GALLERY_DATA;
 }

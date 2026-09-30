@@ -68,7 +68,7 @@ export async function findCustomerByIdentifier(identifier: string) {
 export async function loginCustomer(
   loginIdentifier: string,
   password: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; token?: string; expiresAt?: Date }> {
   try {
     const customer = await findCustomerByIdentifier(loginIdentifier);
 
@@ -114,7 +114,7 @@ export async function loginCustomer(
       console.warn("Could not set cookie (outside request context):", cookieErr);
     }
 
-    return { success: true };
+    return { success: true, token, expiresAt };
   } catch (err) {
     console.error("Customer Login Error:", err);
     return { success: false, error: "An unexpected error occurred during sign in." };

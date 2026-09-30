@@ -43,6 +43,7 @@ export const REAL_DESTINATION_IMAGES = [
 
 import { Tour } from "./data/toursData";
 import { Destination } from "./data/destinationsData";
+import { InstagramSectionData } from "@/lib/sanity/types";
 import { STORIES_DATA } from "./data/storiesData";
 import { TESTIMONIALS_DATA } from "./data/testimonialsData";
 import { FAQS_DATA } from "./data/faqsData";
@@ -358,13 +359,9 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
             </span>
             <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#685752]">
               Why Travel With{" "}
-              <SquigglyText
-                stepDuration={70}
-                scale={[4, 7]}
-                className="text-[#8EB486] font-serif-italic"
-              >
+              <span className="text-[#8EB486] font-serif-italic">
                 Sonali?
-              </SquigglyText>
+              </span>
             </h2>
             <p className="text-base text-[#7A6862]">
               We aren&apos;t a large corporate agency. We are a personal travel company where every detail matters.
@@ -645,28 +642,39 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
             {STORIES_DATA.slice(0, 2).map((story) => (
-              <div key={story.id} className="group flex flex-col justify-between bg-[#F7EFEA] rounded-3xl p-6 border border-[#E8DCD5]">
-                <div className="space-y-4">
-                  <div className="relative h-64 rounded-2xl overflow-hidden">
-                    <Image src={story.image} alt={story.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div key={story.id} className="group flex flex-col justify-between">
+                <div>
+                  <Link href={`/stories/${story.slug}`} className="block relative h-72 sm:h-80 rounded-2xl sm:rounded-3xl overflow-hidden">
+                    <Image
+                      src={story.image}
+                      alt={story.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
                     <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-xs">
                       {story.category}
                     </span>
+                  </Link>
+                  <div className="mt-5 space-y-2.5">
+                    <div className="text-xs font-medium text-[#997C70]">
+                      {story.date} • {story.readTime}
+                    </div>
+                    <Link href={`/stories/${story.slug}`} className="block">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#685752] group-hover:text-[#8EB486] transition-colors leading-snug">
+                        {story.title}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-[#7A6862] leading-relaxed line-clamp-3">
+                      {story.excerpt}
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-bold text-[#685752] group-hover:text-[#8EB486] transition-colors">
-                    {story.title}
-                  </h3>
-                  <p className="text-sm text-[#7A6862] leading-relaxed">
-                    {story.excerpt}
-                  </p>
                 </div>
-                <div className="pt-6 border-t border-[#E8DCD5] flex items-center justify-between mt-4">
-                  <span className="text-xs text-[#997C70]">{story.date} • {story.readTime}</span>
-                  <Link href={`/stories/${story.slug}`} className="inline-flex items-center gap-1 text-xs font-semibold text-[#8EB486] hover:underline group">
+                <div className="pt-4 flex items-center justify-between mt-3">
+                  <Link href={`/stories/${story.slug}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8EB486] hover:underline group/btn">
                     <span>Read Story</span>
-                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
               </div>
@@ -697,13 +705,9 @@ export default function HomeClientView({ tours, destinations, instagramData }: H
               </span>
               <h2 className="text-4xl sm:text-5xl font-serif-italic font-bold text-[#685752]">
                 Meet{" "}
-                <SquigglyText
-                  stepDuration={70}
-                  scale={[4, 7]}
-                  className="text-[#8EB486]"
-                >
+                <span className="text-[#8EB486]">
                   Sonali
-                </SquigglyText>
+                </span>
               </h2>
               <p className="text-lg text-[#685752] font-medium">
                 &ldquo;Behind every journey is someone who cares deeply about the experience.&rdquo;

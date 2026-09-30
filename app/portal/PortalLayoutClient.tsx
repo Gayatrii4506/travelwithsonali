@@ -38,7 +38,12 @@ export default function PortalLayoutClient({ customer, children }: PortalLayoutC
     pathname === "/portal/reset-password";
 
   useEffect(() => {
-    if (isAuthPage || !customer) return;
+    if (isAuthPage) return;
+
+    if (!customer) {
+      router.replace("/portal/login");
+      return;
+    }
 
     async function fetchNotifs() {
       try {
@@ -52,7 +57,7 @@ export default function PortalLayoutClient({ customer, children }: PortalLayoutC
       }
     }
     fetchNotifs();
-  }, [pathname, customer, isAuthPage]);
+  }, [pathname, customer, isAuthPage, router]);
 
   if (isAuthPage || !customer) {
     return <>{children}</>;
