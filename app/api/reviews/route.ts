@@ -145,7 +145,8 @@ export async function GET(request: Request) {
           ...s,
           userEmail: null,
           isApproved: true,
-          updatedAt: s.createdAt,
+          createdAt: new Date(s.createdAt),
+          updatedAt: new Date(s.createdAt),
         }));
       allList = [...dbReviews, ...seedsToAdd];
     } else if (!tourSlug) {
@@ -158,7 +159,8 @@ export async function GET(request: Request) {
               ...s,
               userEmail: null,
               isApproved: true,
-              updatedAt: s.createdAt,
+              createdAt: new Date(s.createdAt),
+              updatedAt: new Date(s.createdAt),
             });
           }
         });
