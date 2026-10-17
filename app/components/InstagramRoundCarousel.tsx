@@ -77,14 +77,11 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
   const touchStartXRef = useRef<number>(0);
   const touchStartYRef = useRef<number>(0);
   const lastTouchXRef = useRef<number>(0);
-  const lastTouchYRef = useRef<number>(0);
-  const touchStartTimeRef = useRef<number>(0);
   const directionLockedRef = useRef<"horizontal" | "vertical" | null>(null);
-  const isDraggingRef = useRef<boolean>(false);
   const hasMovedRef = useRef<boolean>(false);
   const suppressClickRef = useRef<boolean>(false);
-  const momentumTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wheelTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const suppressClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const badge = data?.badge || "Social Community";
   const heading = data?.heading || "Follow Our Moments on Instagram";
@@ -105,8 +102,10 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
   useEffect(() => {
     let ticking = false;
 
-    const updateScroll = () => {
-      if (isDraggingRef.current) return;
+    // The page's vertical scroll position is the single source of truth for
+    // the horizontal track position. Both touch and wheel input update that
+    // scroll position, so this is the only function that writes the transform.
+    const updateTrackFromScroll = () => {
       if (!sectionRef.current || !trackRef.current) return;
       const section = sectionRef.current;
       const track = trackRef.current;
@@ -122,12 +121,15 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       const progress = Math.max(0, Math.min(1, currentScrolled / totalScrollable));
 
       // Max horizontal translation distance
-      const maxTranslate = track.scrollWidth - window.innerWidth + 80;
-      if (maxTranslate > 0) {
-        const translateX = progress * -maxTranslate;
-        track.style.transform = `translate3d(${translateX}px, 0, 0)`;
-      }
+      const maxTranslate = Math.max(0, track.scrollWidth - window.innerWidth + 80);
+      const translateX = progress * -maxTranslate;
+      track.style.transform = `translate3d(${translateX}px, 0, 0)`;
 
+      ticking = false;
+    };
+
+    const updateScroll = () => {
+      updateTrackFromScroll();
       ticking = false;
     };
 
@@ -138,7 +140,7 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       }
     };
 
-    const applyHorizontalDelta = (deltaX: number) => {
+    const getSectionMetrics = () => {
       if (!sectionRef.current || !trackRef.current) return;
       const section = sectionRef.current;
       const track = trackRef.current;
@@ -148,20 +150,26 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       const totalScrollable = section.offsetHeight - windowH;
       if (totalScrollable <= 0) return;
 
-      const maxTranslate = track.scrollWidth - window.innerWidth + 80;
+      const maxTranslate = Math.max(0, track.scrollWidth - window.innerWidth + 80);
       if (maxTranslate <= 0) return;
 
+      const isActive = rect.top <= 10 && rect.top >= -totalScrollable - 10;
+      if (!isActive) return;
+
+      return { rect, totalScrollable, maxTranslate };
+    };
+
+    const applyHorizontalDelta = (deltaX: number) => {
+      const metrics = getSectionMetrics();
+      if (!metrics) return;
+
+      const { rect, totalScrollable, maxTranslate } = metrics;
       const sectionDocTop = window.scrollY + rect.top;
       const currentScrolled = Math.max(0, Math.min(totalScrollable, -rect.top));
 
       // Convert horizontal delta into vertical scroll delta
       const scrollDelta = deltaX * (totalScrollable / maxTranslate);
       const newScrolled = Math.max(0, Math.min(totalScrollable, currentScrolled + scrollDelta));
-
-      const newProgress = newScrolled / totalScrollable;
-      const newTranslateX = newProgress * -maxTranslate;
-
-      track.style.transform = `translate3d(${newTranslateX}px, 0, 0)`;
 
       const targetScrollY = Math.round(sectionDocTop + newScrolled);
       if (Math.abs(window.scrollY - targetScrollY) >= 1) {
@@ -176,53 +184,40 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
           });
         }
       }
+
+      // Lenis updates the native scroll position immediately, but syncing
+      // here keeps the finger/trackpad response frame-perfect without adding
+      // a second transform controller.
+      updateTrackFromScroll();
     };
 
     // Desktop trackpad horizontal wheel handler
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        const section = sectionRef.current;
-        if (!section) return;
+      // A small vertical component is common in trackpad gestures. Require a
+      // clear horizontal majority so ordinary wheel scrolling is untouched.
+      const horizontalIntent = Math.abs(e.deltaX) > Math.abs(e.deltaY) * 1.15;
+      if (!horizontalIntent || !getSectionMetrics()) return;
 
-        const rect = section.getBoundingClientRect();
-        const windowH = window.innerHeight;
-        const totalScrollable = section.offsetHeight - windowH;
+      if (e.cancelable) e.preventDefault();
+      if (trackRef.current) trackRef.current.style.transition = "none";
+      applyHorizontalDelta(e.deltaX);
 
-        if (rect.top <= 10 && rect.top >= -totalScrollable - 10) {
-          if (e.cancelable) {
-            e.preventDefault();
-          }
-          if (trackRef.current) {
-            trackRef.current.style.transition = "none";
-          }
-          applyHorizontalDelta(e.deltaX);
-
-          if (wheelTimeoutRef.current) {
-            clearTimeout(wheelTimeoutRef.current);
-          }
-          wheelTimeoutRef.current = setTimeout(() => {
-            if (trackRef.current && !isDraggingRef.current) {
-              trackRef.current.style.transition = "transform 0.1s linear";
-            }
-          }, 100);
+      if (wheelTimeoutRef.current) clearTimeout(wheelTimeoutRef.current);
+      wheelTimeoutRef.current = setTimeout(() => {
+        if (trackRef.current && !directionLockedRef.current) {
+          trackRef.current.style.transition = "transform 0.1s linear";
         }
-      }
+      }, 100);
     };
 
     // Mobile touch swipe handlers
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
-      if (momentumTimeoutRef.current) {
-        clearTimeout(momentumTimeoutRef.current);
-        momentumTimeoutRef.current = null;
-      }
 
       const touch = e.touches[0];
       touchStartXRef.current = touch.clientX;
       touchStartYRef.current = touch.clientY;
       lastTouchXRef.current = touch.clientX;
-      lastTouchYRef.current = touch.clientY;
-      touchStartTimeRef.current = performance.now();
       directionLockedRef.current = null;
       hasMovedRef.current = false;
     };
@@ -239,19 +234,18 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
           return;
         }
 
-        if (Math.abs(diffY) >= Math.abs(diffX)) {
+        if (Math.abs(diffY) >= Math.abs(diffX) || !getSectionMetrics()) {
           // Vertical movement: preserve normal page scroll
           directionLockedRef.current = "vertical";
           return;
         } else {
-          // Horizontal movement: lock direction and disable transition for instant 1:1 finger tracking
+          // Horizontal movement: lock direction and disable transition for
+          // instant 1:1 finger tracking.
           directionLockedRef.current = "horizontal";
-          isDraggingRef.current = true;
           if (trackRef.current) {
             trackRef.current.style.transition = "none";
           }
           lastTouchXRef.current = touch.clientX;
-          lastTouchYRef.current = touch.clientY;
         }
       }
 
@@ -263,47 +257,28 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
 
         const stepDeltaX = -(touch.clientX - lastTouchXRef.current);
         lastTouchXRef.current = touch.clientX;
-        lastTouchYRef.current = touch.clientY;
 
         applyHorizontalDelta(stepDeltaX);
       }
     };
 
-    const onTouchEnd = () => {
+    const finishTouch = (wasCancelled: boolean) => {
       if (directionLockedRef.current === "horizontal") {
-        isDraggingRef.current = false;
         directionLockedRef.current = null;
+        if (trackRef.current) trackRef.current.style.transition = "transform 0.1s linear";
 
-        const elapsed = Math.max(1, performance.now() - touchStartTimeRef.current);
-        const totalDiffX = lastTouchXRef.current - touchStartXRef.current;
-        const velocityX = totalDiffX / elapsed;
-
-        if (Math.abs(velocityX) > 0.3) {
-          const momentumDeltaX = -velocityX * 220;
-          if (trackRef.current) {
-            trackRef.current.style.transition = "transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)";
-          }
-          applyHorizontalDelta(momentumDeltaX);
-
-          momentumTimeoutRef.current = setTimeout(() => {
-            if (trackRef.current && !isDraggingRef.current) {
-              trackRef.current.style.transition = "transform 0.1s linear";
-            }
-          }, 350);
-        } else {
-          if (trackRef.current) {
-            trackRef.current.style.transition = "transform 0.1s linear";
-          }
-        }
-
-        if (hasMovedRef.current) {
+        if (hasMovedRef.current && !wasCancelled) {
           suppressClickRef.current = true;
-          setTimeout(() => {
+          if (suppressClickTimeoutRef.current) clearTimeout(suppressClickTimeoutRef.current);
+          suppressClickTimeoutRef.current = setTimeout(() => {
             suppressClickRef.current = false;
           }, 300);
         }
       }
     };
+
+    const onTouchEnd = () => finishTouch(false);
+    const onTouchCancel = () => finishTouch(true);
 
     const container = containerRef.current;
     if (container) {
@@ -311,7 +286,7 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       container.addEventListener("touchstart", onTouchStart, { passive: true });
       container.addEventListener("touchmove", onTouchMove, { passive: false });
       container.addEventListener("touchend", onTouchEnd, { passive: true });
-      container.addEventListener("touchcancel", onTouchEnd, { passive: true });
+      container.addEventListener("touchcancel", onTouchCancel, { passive: true });
     }
 
     updateScroll();
@@ -326,13 +301,13 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
         container.removeEventListener("touchstart", onTouchStart);
         container.removeEventListener("touchmove", onTouchMove);
         container.removeEventListener("touchend", onTouchEnd);
-        container.removeEventListener("touchcancel", onTouchEnd);
-      }
-      if (momentumTimeoutRef.current) {
-        clearTimeout(momentumTimeoutRef.current);
+        container.removeEventListener("touchcancel", onTouchCancel);
       }
       if (wheelTimeoutRef.current) {
         clearTimeout(wheelTimeoutRef.current);
+      }
+      if (suppressClickTimeoutRef.current) {
+        clearTimeout(suppressClickTimeoutRef.current);
       }
     };
   }, []);
