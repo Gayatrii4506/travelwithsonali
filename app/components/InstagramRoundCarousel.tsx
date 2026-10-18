@@ -88,6 +88,7 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
 
   const momentumTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wheelTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const suppressClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const badge = data?.badge || "Social Community";
   const heading = data?.heading || "Follow Our Moments on Instagram";
@@ -114,13 +115,13 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
   useEffect(() => {
     let ticking = false;
 
-    const updateScroll = () => {
-      // Scheduler fix: reset ticking at the beginning of animation frame
-      ticking = false;
+    // The page's vertical scroll position is the primary source of truth for
+    // the horizontal track position when scrolling normally.
+    const updateTrackFromScroll = () => {
+      if (!sectionRef.current || !trackRef.current) return;
 
       // Do not overwrite position while the user is actively dragging the cards horizontally
       if (isDraggingRef.current) return;
-      if (!sectionRef.current || !trackRef.current) return;
 
       const section = sectionRef.current;
       const track = trackRef.current;
@@ -144,6 +145,12 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       }
     };
 
+    const updateScroll = () => {
+      // Scheduler fix: reset ticking at the beginning of animation frame to prevent starvation
+      ticking = false;
+      updateTrackFromScroll();
+    };
+
     const onScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(updateScroll);
@@ -151,7 +158,7 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       }
     };
 
-    const applyTrackpadHorizontalDelta = (deltaX: number) => {
+    const getSectionMetrics = () => {
       if (!sectionRef.current || !trackRef.current) return;
       const section = sectionRef.current;
       const track = trackRef.current;
@@ -164,16 +171,22 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       const maxTranslate = Math.max(0, track.scrollWidth - window.innerWidth + 80);
       if (maxTranslate <= 0) return;
 
+      const isActive = rect.top <= 10 && rect.top >= -totalScrollable - 10;
+      if (!isActive) return;
+
+      return { rect, totalScrollable, maxTranslate };
+    };
+
+    const applyHorizontalDelta = (deltaX: number) => {
+      const metrics = getSectionMetrics();
+      if (!metrics) return;
+
+      const { rect, totalScrollable, maxTranslate } = metrics;
       const sectionDocTop = window.scrollY + rect.top;
       const currentScrolled = Math.max(0, Math.min(totalScrollable, -rect.top));
 
       const scrollDelta = deltaX * (totalScrollable / maxTranslate);
       const newScrolled = Math.max(0, Math.min(totalScrollable, currentScrolled + scrollDelta));
-
-      const newProgress = newScrolled / totalScrollable;
-      const newTranslateX = newProgress * -maxTranslate;
-      translateXRef.current = newTranslateX;
-      track.style.transform = `translate3d(${newTranslateX}px, 0, 0)`;
 
       const targetScrollY = Math.round(sectionDocTop + newScrolled);
       if (Math.abs(window.scrollY - targetScrollY) >= 1) {
@@ -188,37 +201,28 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
           });
         }
       }
+
+      // Sync transform and internal tracking position
+      updateTrackFromScroll();
     };
 
     // Desktop trackpad horizontal wheel handler
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        const section = sectionRef.current;
-        if (!section) return;
+      // A small vertical component is common in trackpad gestures. Require a
+      // clear horizontal majority so ordinary wheel scrolling is untouched.
+      const horizontalIntent = Math.abs(e.deltaX) > Math.abs(e.deltaY) * 1.15;
+      if (!horizontalIntent || !getSectionMetrics()) return;
 
-        const rect = section.getBoundingClientRect();
-        const windowH = window.innerHeight;
-        const totalScrollable = section.offsetHeight - windowH;
+      if (e.cancelable) e.preventDefault();
+      if (trackRef.current) trackRef.current.style.transition = "none";
+      applyHorizontalDelta(e.deltaX);
 
-        if (rect.top <= 10 && rect.top >= -totalScrollable - 10) {
-          if (e.cancelable) {
-            e.preventDefault();
-          }
-          if (trackRef.current) {
-            trackRef.current.style.transition = "none";
-          }
-          applyTrackpadHorizontalDelta(e.deltaX);
-
-          if (wheelTimeoutRef.current) {
-            clearTimeout(wheelTimeoutRef.current);
-          }
-          wheelTimeoutRef.current = setTimeout(() => {
-            if (trackRef.current && !isDraggingRef.current) {
-              trackRef.current.style.transition = "transform 0.1s linear";
-            }
-          }, 100);
+      if (wheelTimeoutRef.current) clearTimeout(wheelTimeoutRef.current);
+      wheelTimeoutRef.current = setTimeout(() => {
+        if (trackRef.current && !isDraggingRef.current) {
+          trackRef.current.style.transition = "transform 0.1s linear";
         }
-      }
+      }, 100);
     };
 
     const container = containerRef.current;
@@ -241,6 +245,9 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       }
       if (wheelTimeoutRef.current) {
         clearTimeout(wheelTimeoutRef.current);
+      }
+      if (suppressClickTimeoutRef.current) {
+        clearTimeout(suppressClickTimeoutRef.current);
       }
     };
   }, []);
@@ -374,7 +381,8 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       // Suppress accidental card clicks if finger dragged
       if (hasMovedRef.current) {
         suppressClickRef.current = true;
-        setTimeout(() => {
+        if (suppressClickTimeoutRef.current) clearTimeout(suppressClickTimeoutRef.current);
+        suppressClickTimeoutRef.current = setTimeout(() => {
           suppressClickRef.current = false;
         }, 300);
       }
