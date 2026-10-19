@@ -86,6 +86,7 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
   const pointerStartTimeRef = useRef<number>(0);
   const activePointerIdRef = useRef<number | null>(null);
 
+  const scrollRafIdRef = useRef<number | null>(null);
   const momentumTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wheelTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const suppressClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -148,12 +149,13 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
     const updateScroll = () => {
       // Scheduler fix: reset ticking at the beginning of animation frame to prevent starvation
       ticking = false;
+      scrollRafIdRef.current = null;
       updateTrackFromScroll();
     };
 
     const onScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(updateScroll);
+        scrollRafIdRef.current = window.requestAnimationFrame(updateScroll);
         ticking = true;
       }
     };
@@ -240,6 +242,10 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       if (container) {
         container.removeEventListener("wheel", onWheel);
       }
+      if (scrollRafIdRef.current !== null) {
+        window.cancelAnimationFrame(scrollRafIdRef.current);
+        scrollRafIdRef.current = null;
+      }
       if (momentumTimeoutRef.current) {
         clearTimeout(momentumTimeoutRef.current);
       }
@@ -286,7 +292,6 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
         // Horizontal gesture locked: capture pointer and drive track translation
         directionLockedRef.current = "horizontal";
         isDraggingRef.current = true;
-        lastPointerXRef.current = e.clientX;
         try {
           e.currentTarget.setPointerCapture(e.pointerId);
         } catch {
@@ -313,6 +318,25 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       // Instant 1:1 finger tracking clamped within carousel boundaries
       translateXRef.current = Math.max(-maxTranslate, Math.min(0, translateXRef.current + stepDeltaX));
       trackRef.current.style.transform = `translate3d(${translateXRef.current}px, 0, 0)`;
+    }
+  };
+
+  const handleDragCancel = () => {
+    isDraggingRef.current = false;
+    directionLockedRef.current = null;
+    activePointerIdRef.current = null;
+
+    if (trackRef.current) {
+      trackRef.current.style.transition = "transform 0.1s linear";
+    }
+
+    // Suppress accidental card clicks if finger dragged
+    if (hasMovedRef.current) {
+      suppressClickRef.current = true;
+      if (suppressClickTimeoutRef.current) clearTimeout(suppressClickTimeoutRef.current);
+      suppressClickTimeoutRef.current = setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 300);
     }
   };
 
@@ -393,8 +417,7 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
   };
 
   const onPointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (activePointerIdRef.current !== e.pointerId) return;
-    activePointerIdRef.current = null;
+    if (activePointerIdRef.current !== null && activePointerIdRef.current !== e.pointerId) return;
 
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
@@ -402,12 +425,16 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
       // Capture already released
     }
 
-    // Pointer was claimed by browser for native vertical scroll
-    isDraggingRef.current = false;
-    directionLockedRef.current = null;
-    if (trackRef.current) {
-      trackRef.current.style.transition = "transform 0.1s linear";
-    }
+    handleDragCancel();
+  };
+
+  const onLostPointerCapture = (e: React.PointerEvent<HTMLDivElement>) => {
+    // If activePointerIdRef is null and not dragging, pointerup already completed normally.
+    // Safe, idempotent cleanup: do not interrupt completed-gesture synchronization or momentum.
+    if (!isDraggingRef.current && activePointerIdRef.current === null) return;
+    if (activePointerIdRef.current !== null && activePointerIdRef.current !== e.pointerId) return;
+
+    handleDragCancel();
   };
 
   return (
@@ -424,6 +451,7 @@ export default function InstagramRoundCarousel({ data }: InstagramRoundCarouselP
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
+        onLostPointerCapture={onLostPointerCapture}
         className="sticky top-0 h-screen w-full flex flex-col justify-between py-3 sm:py-5 lg:py-6 overflow-hidden select-none"
       >
         {/* Section Header */}
